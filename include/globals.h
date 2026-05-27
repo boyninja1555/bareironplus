@@ -270,6 +270,7 @@ extern int block_changes_count;
 
 extern PlayerData player_data[MAX_PLAYERS];
 extern int player_data_count;
+extern int online_player_count;
 
 extern MobData mob_data[MAX_MOBS];
 

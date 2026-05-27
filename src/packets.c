@@ -27,20 +27,27 @@
 // S->C Status Response (server list ping)
 int sc_statusResponse (int client_fd) {
 
-  char header[] = "{"
+  char header[512];
+  snprintf(header, sizeof(header),
+    "{"
     "\"version\":{\"name\":\"26.1.2\",\"protocol\":775},"
-    "\"description\":{\"text\":\"";
+    "\"players\":{\"max\":%d,\"online\":%d},"
+    "\"description\":{\"text\":\"",
+    MAX_PLAYERS,
+    online_player_count
+  );
+
   char footer[] = "\"}}";
 
-  uint16_t string_len = sizeof(header) + sizeof(footer) + motd_len - 2;
+  uint16_t string_len = strlen(header) + strlen(footer) + motd_len;
 
   writeVarInt(client_fd, 1 + string_len + sizeVarInt(string_len));
   writeByte(client_fd, 0x00);
 
   writeVarInt(client_fd, string_len);
-  send_all(client_fd, header, sizeof(header) - 1);
+  send_all(client_fd, header, strlen(header));
   send_all(client_fd, motd, motd_len);
-  send_all(client_fd, footer, sizeof(footer) - 1);
+  send_all(client_fd, footer, strlen(footer));
 
   return 0;
 }

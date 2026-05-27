@@ -171,6 +171,8 @@ void handlePlayerDisconnect (int client_fd) {
       return;
     }
   }
+
+  online_player_count--;
 }
 
 // Marks a client as connected and broadcasts their data to other players
@@ -193,7 +195,7 @@ void handlePlayerJoin (PlayerData* player) {
   // Clear "client loading" flag and fallback timer
   player->flags &= ~0x20;
   player->flagval_16 = 0;
-
+  online_player_count++;
 }
 
 void disconnectClient (int *client_fd, int cause) {
