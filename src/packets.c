@@ -28,7 +28,7 @@
 int sc_statusResponse (int client_fd) {
 
   char header[] = "{"
-    "\"version\":{\"name\":\"1.21.8\",\"protocol\":772},"
+    "\"version\":{\"name\":\"26.1.2\",\"protocol\":775},"
     "\"description\":{\"text\":\"";
   char footer[] = "\"}}";
 
