@@ -673,7 +673,7 @@ uint16_t getMiningResult (uint16_t held_item, uint8_t block) {
     case B_iron_block:
     case B_gold_block:
     case B_diamond_block:
-    case B_redstone_block:
+    //case B_redstone_block:
     case B_coal_block:
       // Check if player is holding (any) pickaxe
       if (
