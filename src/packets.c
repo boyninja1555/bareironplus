@@ -140,17 +140,19 @@ int cs_clientInformation (int client_fd) {
   return 0;
 }
 
+void writeString(int fd, const char *str) {
+    int len = strlen(str);
+    writeVarInt(fd, len);
+    send_all(fd, str, len);
+}
+
 // S->C Clientbound Known Packs
 int sc_knownPacks (int client_fd) {
   printf("Sending Server's Known Packs\n\n");
-  char known_packs[] = {
-    0x0e, 0x01, 0x09, 0x6d, 0x69, 0x6e,
-    0x65, 0x63, 0x72, 0x61, 0x66, 0x74, 0x04, 0x63,
-    0x6f, 0x72, 0x65, 0x06, 0x31, 0x2e, 0x32, 0x31,
-    0x2e, 0x38
-  };
-  writeVarInt(client_fd, 24);
-  send_all(client_fd, &known_packs, 24);
+  writeVarInt(client_fd, sizeVarInt(0x0E) + sizeVarInt(0));
+  writeVarInt(client_fd, 0x0E); // packet id (for 775)
+  writeVarInt(client_fd, 0); // number of packs
+
   return 0;
 }
 
@@ -171,17 +173,17 @@ int cs_pluginMessage (int client_fd) {
 
 // S->C Clientbound Plugin Message
 int sc_sendPluginMessage (int client_fd, const char *channel, const uint8_t *data, size_t data_len) {
-  printf("Sending Plugin Message\n\n");
-  int channel_len = (int)strlen(channel);
-
-  writeVarInt(client_fd, 1 + sizeVarInt(channel_len) + channel_len + sizeVarInt(data_len) + data_len);
-  writeByte(client_fd, 0x01);
-
-  writeVarInt(client_fd, channel_len);
-  send_all(client_fd, channel, channel_len);
-
-  writeVarInt(client_fd, data_len);
-  send_all(client_fd, data, data_len);
+  //printf("Sending Plugin Message (Channel: %s)\n\n", channel);
+  //int channel_len = (int)strlen(channel);
+//
+  //// In Protocol 775 Configuration state, Clientbound Custom Payload is ID 0x01
+  //writeVarInt(client_fd, 1 + sizeVarInt(channel_len) + channel_len + data_len);
+  //writeByte(client_fd, 0x01); // 0x01 = Custom Payload Packet ID in Config State for 775
+//
+  //writeVarInt(client_fd, channel_len);
+  //send_all(client_fd, channel, channel_len);
+//
+  //send_all(client_fd, data, data_len);
 
   return 0;
 }
@@ -189,7 +191,7 @@ int sc_sendPluginMessage (int client_fd, const char *channel, const uint8_t *dat
 // S->C Finish Configuration
 int sc_finishConfiguration (int client_fd) {
   writeVarInt(client_fd, 1);
-  writeVarInt(client_fd, 0x03);
+  writeVarInt(client_fd, 0x04);
   return 0;
 }
 
@@ -204,9 +206,9 @@ int sc_loginPlay (int client_fd) {
   writeByte(client_fd, false);
   // dimensions
   writeVarInt(client_fd, 1);
-  writeVarInt(client_fd, 9);
-  const char *dimension = "overworld";
-  send_all(client_fd, dimension, 9);
+  const char *dimension = "minecraft:overworld";
+  writeVarInt(client_fd, 19);
+  send_all(client_fd, dimension, 19);
   // maxplayers
   writeVarInt(client_fd, MAX_PLAYERS);
   // view distance
@@ -440,9 +442,10 @@ int sc_chunkDataAndUpdateLight (int client_fd, int _x, int _z) {
 int sc_keepAlive (int client_fd) {
 
   writeVarInt(client_fd, 9);
-  writeByte(client_fd, 0x26);
+  writeVarInt(client_fd, 0x1B);
 
-  writeUint64(client_fd, 0);
+  uint64_t ticks = get_program_time();
+  writeUint64(client_fd, ticks);
 
   return 0;
 }
